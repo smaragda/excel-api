@@ -25,7 +25,9 @@ public class Startup {
 
     @EventListener
     public void loadExcel(ApplicationReadyEvent e) {
-        log.info("loading excel..");
+        log.info("java io temp dir: {}", System.getProperty("java.io.tmpdir"));
+
+        log.debug("loading excel..");
         Resource resource = new ClassPathResource("easy.xls");
         try (FileInputStream fis = new FileInputStream(resource.getFile())) {
             Workbook wb = new HSSFWorkbook(fis);
@@ -39,7 +41,7 @@ public class Startup {
         } catch (IOException ioException) {
             log.error("IO Exception", ioException);
         }
-        log.info("..excel loaded.");
+        log.debug("..excel loaded.");
     }
 
 }

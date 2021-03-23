@@ -5,7 +5,11 @@ import cz.marcis.calculations.excelapi.LoadedExcel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.*;
+import lombok.val;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellReference;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +32,10 @@ public class SheetService {
         evaluate();
 
         return readSheetAsMap();
-
-//        return objectMapper.writeValueAsString(readSheetAsMap());
     }
 
     private Map<String, Number> readSheetAsMap() {
-        Map<String, Number> map = new HashMap<>();
+        val map = new HashMap<String, Number>();
 
         for (Row r : excel.getSheet()) {
             for (Cell c : r) {
@@ -52,21 +54,18 @@ public class SheetService {
     }
 
     private void replaceValue(String cellName, Number value) {
-        CellReference cellReference = new CellReference(cellName);
-        Row row = excel.getSheet().getRow(cellReference.getRow());
-        Cell cell = row.getCell(cellReference.getCol());
+        val cellReference = new CellReference(cellName);
+        val row = excel.getSheet().getRow(cellReference.getRow());
+        val cell = row.getCell(cellReference.getCol());
 
         log.debug("replacing value '{}' in cell {} by value '{}'!", cell.getNumericCellValue(), cellName, value);
         cell.setCellValue(value.doubleValue());
     }
 
     public void evaluate() {
-        Workbook wb = excel.getWorkbook();
-        Sheet sheet = excel.getSheet();
+        FormulaEvaluator evaluator = excel.getWorkbook().getCreationHelper().createFormulaEvaluator();
 
-        FormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
-
-        for (Row r : sheet) {
+        for (Row r : excel.getSheet()) {
             for (Cell c : r) {
                 if (c.getCellType() == CellType.FORMULA) {
                     evaluator.evaluateFormulaCell(c);
@@ -74,6 +73,4 @@ public class SheetService {
             }
         }
     }
-
-
 }
