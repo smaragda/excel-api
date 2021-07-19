@@ -1,6 +1,7 @@
 HELP.md
 
 /external
+/uploaded
 
 target/
 !.mvn/wrapper/maven-wrapper.jar

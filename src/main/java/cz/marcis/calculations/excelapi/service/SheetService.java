@@ -1,7 +1,6 @@
 package cz.marcis.calculations.excelapi.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import cz.marcis.calculations.excelapi.LoadedExcel;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,7 @@ import java.util.Map;
 public class SheetService {
 
     private final ObjectMapper objectMapper;
-    private final LoadedExcel excel;
+    private final LoadedExcel loadedExcel;
 
     @SneakyThrows
     public Map<String, Number> evaluateSheet(String inputCellsSheet) {
@@ -37,7 +36,7 @@ public class SheetService {
     private Map<String, Number> readSheetAsMap() {
         val map = new HashMap<String, Number>();
 
-        for (Row r : excel.getSheet()) {
+        for (Row r : loadedExcel.getSheet()) {
             for (Cell c : r) {
                 double d = c.getNumericCellValue();
                 CellReference cellReference = new CellReference(c.getRowIndex(), c.getColumnIndex());
@@ -55,7 +54,7 @@ public class SheetService {
 
     private void replaceValue(String cellName, Number value) {
         val cellReference = new CellReference(cellName);
-        val row = excel.getSheet().getRow(cellReference.getRow());
+        val row = loadedExcel.getSheet().getRow(cellReference.getRow());
         val cell = row.getCell(cellReference.getCol());
 
         log.debug("replacing value '{}' in cell {} by value '{}'!", cell.getNumericCellValue(), cellName, value);
@@ -63,9 +62,9 @@ public class SheetService {
     }
 
     public void evaluate() {
-        FormulaEvaluator evaluator = excel.getWorkbook().getCreationHelper().createFormulaEvaluator();
+        FormulaEvaluator evaluator = loadedExcel.getWorkbook().getCreationHelper().createFormulaEvaluator();
 
-        for (Row r : excel.getSheet()) {
+        for (Row r : loadedExcel.getSheet()) {
             for (Cell c : r) {
                 if (c.getCellType() == CellType.FORMULA) {
                     evaluator.evaluateFormulaCell(c);
