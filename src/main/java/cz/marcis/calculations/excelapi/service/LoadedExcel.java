@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Singleton
- * - only one sheet of Excel is supported only.
+ * - only one Excel is supported only.
  * - only one sheet of Excel is supported only.
  */
 @Data
