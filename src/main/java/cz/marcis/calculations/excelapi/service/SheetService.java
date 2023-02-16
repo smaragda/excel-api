@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -25,7 +26,7 @@ public class SheetService {
 
     @SneakyThrows
     public Map<String, Number> evaluateSheet(String inputCellsSheet) {
-        Map<String, Number> inputCells = objectMapper.readValue(inputCellsSheet, HashMap.class);
+        Map<String, Object> inputCells = objectMapper.readValue(inputCellsSheet, HashMap.class);
 
         replaceValues(inputCells);
         evaluate();
@@ -38,27 +39,49 @@ public class SheetService {
 
         for (Row r : loadedExcel.getSheet()) {
             for (Cell c : r) {
-                double d = c.getNumericCellValue();
-                CellReference cellReference = new CellReference(c.getRowIndex(), c.getColumnIndex());
-                String ref = cellReference.formatAsString();
-
-                map.put(ref, d);
+                getDoubleValue(c).ifPresent(aDouble -> mapOnlyNumbers(map, c, aDouble));
             }
         }
         return map;
     }
 
-    private void replaceValues(Map<String, Number> inputCells) {
+    private void mapOnlyNumbers(HashMap<String, Number> map, Cell c, Double aDouble) {
+        CellReference cellReference = new CellReference(c.getRowIndex(), c.getColumnIndex());
+        String ref = cellReference.formatAsString();
+        map.put(ref, aDouble);
+    }
+
+    private Optional<Double> getDoubleValue(Cell c) {
+        try {
+            return Optional.of(c.getNumericCellValue());
+        } catch (IllegalStateException e) {
+            return Optional.empty();
+        }
+    }
+
+    private void replaceValues(Map<String, Object> inputCells) {
         inputCells.forEach(this::replaceValue);
     }
 
-    private void replaceValue(String cellName, Number value) {
+    private void replaceValue(String cellName, Object value) {
+        double dValue = 0d;
+        if (value instanceof String) {
+            dValue = Double.parseDouble((String) value);
+        }
+        if (value instanceof Double) {
+            dValue = (Double) value;
+        }
+        if (value instanceof Integer) {
+            dValue = ((Integer) value).doubleValue();
+        }
+
         val cellReference = new CellReference(cellName);
         val row = loadedExcel.getSheet().getRow(cellReference.getRow());
         val cell = row.getCell(cellReference.getCol());
 
         log.debug("replacing value '{}' in cell {} by value '{}'!", cell.getNumericCellValue(), cellName, value);
-        cell.setCellValue(value.doubleValue());
+//        cell.setCellValue(value.doubleValue());
+        cell.setCellValue(dValue);
     }
 
     public void evaluate() {

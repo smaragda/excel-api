@@ -1,0 +1,76 @@
+openapi: 3.0.1
+info:
+  title: Swagger Petstore
+  description: 'This is a sample server Petstore server.  You can find out more about     Swagger
+    at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For
+    this sample, you can use the api key `special-key` to test the authorization     filters.'
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: excel
+    description: Load and eval excel
+paths:
+  /upload:
+    post:
+      tags:
+        - excel
+      summary: uploads an excel
+      operationId: uploadFile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type:
+                object
+              properties:
+                file:
+                  type: string
+                  description: file to upload
+                  format: binary
+      responses:
+        200:
+          description: successful operation
+          content:
+            plain/text:
+              example: UPLOADED
+  /calc:
+    post:
+      tags:
+        - excel
+      summary: Returns result of evaluation
+      description: Returns a map of excel cells
+      operationId: getResult
+
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              type: object
+              properties:
+                a1:
+                  type: number
+                b1:
+                  type: number
+                c1:
+                  type: number
+              example:   # Sample object
+                a1: "2"
+                b1: "2"
+
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              example:
+                {"a1":"8", "b1": "8", "c1": "16"}

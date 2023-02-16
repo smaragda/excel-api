@@ -5,15 +5,13 @@ import cz.marcis.calculations.excelapi.service.TempDirXlsLoader;
 import cz.marcis.calculations.excelapi.service.UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
 @Slf4j
+@CrossOrigin
 @RestController
 @RequiredArgsConstructor
 public class DataController {
@@ -35,7 +33,7 @@ public class DataController {
     }
 
     @PostMapping(value = "/upload", produces = "plain/text")
-    public String submit(@RequestParam("files") MultipartFile file) {
+    public String submit(@RequestParam("file") MultipartFile file) {
         log.info("Request for uploading excel received.");
 
         uploadService.moveToProjectDir(file);
